@@ -192,7 +192,10 @@ export const getFlexTemplate = (
     latitude: string,
     longitude: string,
     timeText: string,
-    postbackData?: string
+    postbackData?: string,
+    extendedHelpId?: number,
+    resSafezone?: any,
+    resUser?: { users_line_id: string }
 ) => {
     const config = SAFEZONE_STATUS_CONFIG[status] || SAFEZONE_STATUS_CONFIG[2];
     const contents: any[] = [
@@ -224,7 +227,7 @@ export const getFlexTemplate = (
                 style: 'primary',
                 height: 'sm',
                 margin: 'xxl',
-                color: '#ff0000',  
+                color: '#ff0000',
                 action: {
                     type: 'postback',
                     label: 'ส่งขอความช่วยเหลือเพิ่มเติม',
@@ -239,7 +242,7 @@ export const getFlexTemplate = (
                 action: {
                     type: 'uri',
                     label: 'ดูแผนที่จากระบบ',
-                    uri: `${WEB_API}/location?lat=${latitude}&lng=${longitude}`
+                    uri: `${process.env.WEB_DOMAIN}/location?idlocation=${extendedHelpId || ''}&idsafezone=${resSafezone?.safezone_id || ''}&auToken=${resUser?.users_line_id || ''}`
                 },
             },
             {
@@ -1340,7 +1343,7 @@ export const replyNotificationPostback = async ({
                                         data: `userLineId=${replyToken}&takecarepersonId=${takecarepersonId}&type=${type}`,
                                     }
                                 },
-                                
+
                                 {
                                     type: "text",
                                     text: " ",
