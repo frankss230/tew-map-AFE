@@ -115,6 +115,7 @@ export const replyNotification = async ({
     locationData,
 }: ReplyNotification) => {
     try {
+        // ดึงพิกัดจาก location
         const latitude = Number(locationData.locat_latitude);
         const longitude = Number(locationData.locat_longitude);
 
@@ -205,6 +206,17 @@ export const replyNotification = async ({
                                             label: 'ตอบรับเคสช่วยเหลือ',
                                             data: `type=accept&takecareId=${resTakecareperson.takecare_id}&extenId=${extendedHelpId}&userLineId=${resUser.users_line_id}`,
                                         },
+                                    },
+                                    {
+                                        type: 'button',
+                                        style: 'secondary',
+                                        height: 'sm',
+                                        margin: 'xxl',
+                                        action: {
+                                            type: 'uri',
+                                            label: 'ดูแผนที่/นำทาง',
+                                            uri: `https://www.google.com/maps/search/?api=1&query=${locationData.locat_latitude},${locationData.locat_longitude}`
+                                        }
                                     },
                                     {
                                         type: 'button',
