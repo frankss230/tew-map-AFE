@@ -26,7 +26,7 @@ interface ReplyNotification {
         takecare_tel1 : string;
         takecare_id   : number;
     };
-    resSafezone      : {};
+    resSafezone      : any;
     extendedHelpId   : number;
     locationData : {
         locat_latitude : string;
@@ -215,7 +215,7 @@ export const replyNotification = async ({
                                         action: {
                                             type: 'uri',
                                             label: 'ดูแผนที่/นำทาง',
-                                            uri: `https://www.google.com/maps/search/?api=1&query=${locationData.locat_latitude},${locationData.locat_longitude}`
+                                            uri: `${process.env.WEB_DOMAIN}/location?idlocation=${extendedHelpId}&idsafezone=${resSafezone?.safezone_id || ''}&auToken=${resUser.users_line_id}`
                                         }
                                     },
                                     {
