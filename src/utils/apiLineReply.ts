@@ -1344,9 +1344,31 @@ export const replyNotificationPostback = async ({
 
 }: ReplyNotificationPostback) => {
     try {
+        // ดึงพิกัดล่าสุดของผู้ที่มีภาวะพึ่งพิง (ถ้ามี) และแนบเป็นข้อความประเภท location
+        let preMessages: any[] = [];
+        try {
+            const takecareLoc = await prisma.location.findFirst({
+                where: { takecare_id: Number(takecarepersonId) },
+                orderBy: { locat_timestamp: 'desc' }
+            });
+
+            if (takecareLoc) {
+                preMessages.push({
+                    type: 'location',
+                    title: `ตำแหน่งผู้ที่มีภาวะพึ่งพิง`,
+                    address: `ตำแหน่งล่าสุด`,
+                    latitude: Number(takecareLoc.locat_latitude),
+                    longitude: Number(takecareLoc.locat_longitude),
+                });
+            }
+        } catch (err) {
+            console.log('Could not fetch takecare latest location:', err);
+        }
+
         const requestData = {
             to: replyToken,
             messages: [
+                ...preMessages,
                 {
                     type: "flex",
                     altText: "แจ้งเตือน",
