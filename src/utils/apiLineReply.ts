@@ -311,10 +311,9 @@ export const getFlexTemplate = (
                 style: 'primary',
                 height: 'sm',
                 action: {
-                    type: 'postback',
+                    type: 'uri',
                     label: 'ดูแผนที่จากระบบ',
-                    displayText: 'ขอดูตำแหน่งผู้ที่มีภาวะพึ่งพิง',
-                    data: `action=show_map&extenId=${extendedHelpId || ''}&idsafezone=${resSafezone?.safezone_id || ''}&caregiverLineId=${resUser?.users_line_id || ''}`
+                    uri: `${process.env.WEB_DOMAIN}/location?idlocation=${extendedHelpId || ''}&idsafezone=${resSafezone?.safezone_id || ''}&auToken=${resUser?.users_line_id || ''}`
                 },
             },
             {
