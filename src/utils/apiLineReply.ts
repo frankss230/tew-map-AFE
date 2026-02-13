@@ -10,6 +10,77 @@ const LINE_HEADER = {
     Authorization: `Bearer ${process.env.CHANNEL_ACCESS_TOKEN_LINE}`, // Replace with your LINE Channel Access Token
 };
 
+export const replyMapCoordinates = async ({
+    toLineId,
+    extenId,
+    takecareId,
+}: { toLineId: string; extenId?: number | string; takecareId?: number | string }) => {
+    try {
+        // Determine target takecare_id either from provided takecareId or from extendedhelp record
+        let targetTakecareId: number | undefined = takecareId ? Number(takecareId) : undefined;
+
+        if (!targetTakecareId && extenId) {
+            const ex = await prisma.extendedhelp.findUnique({ where: { exten_id: Number(extenId) } });
+            if (ex?.takecare_id) targetTakecareId = Number(ex.takecare_id);
+        }
+
+        if (!targetTakecareId) {
+            // nothing to show
+            await axios.post(LINE_PUSH_MESSAGING_API, {
+                to: toLineId,
+                messages: [{ type: 'text', text: 'ไม่สามารถระบุตัวผู้ที่ต้องการแสดงตำแหน่งได้' }]
+            }, { headers: LINE_HEADER });
+            return;
+        }
+
+        // fetch takecareperson and latest location
+        const takecare = await prisma.takecareperson.findUnique({ where: { takecare_id: targetTakecareId } });
+        const takecareLoc = await prisma.location.findFirst({
+            where: { takecare_id: targetTakecareId },
+            orderBy: { locat_timestamp: 'desc' }
+        });
+
+        // fetch caregiver user by line id and their latest location (if any)
+        const caregiverUser = await prisma.users.findUnique({ where: { users_line_id: toLineId } });
+        const caregiverLoc = caregiverUser ? await prisma.location.findFirst({ where: { users_id: caregiverUser.users_id }, orderBy: { locat_timestamp: 'desc' } }) : null;
+
+        const messages: any[] = [];
+
+        if (takecareLoc) {
+            messages.push({
+                type: 'location',
+                title: `ตำแหน่งผู้ที่มีภาวะพึ่งพิง ${takecare?.takecare_fname || ''} ${takecare?.takecare_sname || ''}`,
+                address: `ตำแหน่งล่าสุด (${moment(takecareLoc.locat_timestamp).format('DD/MM/YYYY HH:mm')})`,
+                latitude: Number(takecareLoc.locat_latitude),
+                longitude: Number(takecareLoc.locat_longitude),
+            });
+        } else {
+            messages.push({ type: 'text', text: 'ไม่พบพิกัดผู้ที่มีภาวะพึ่งพิงล่าสุด' });
+        }
+
+        if (caregiverLoc) {
+            messages.push({
+                type: 'location',
+                title: `ตำแหน่งผู้ดูแล`,
+                address: `ตำแหน่งล่าสุด (${moment(caregiverLoc.locat_timestamp).format('DD/MM/YYYY HH:mm')})`,
+                latitude: Number(caregiverLoc.locat_latitude),
+                longitude: Number(caregiverLoc.locat_longitude),
+            });
+        } else {
+            messages.push({ type: 'text', text: 'ไม่พบพิกัดผู้ดูแลล่าสุด' });
+        }
+
+        const requestData = {
+            to: toLineId,
+            messages,
+        };
+
+        await axios.post(LINE_PUSH_MESSAGING_API, requestData, { headers: LINE_HEADER });
+    } catch (error) {
+        if (error instanceof Error) console.log('replyMapCoordinates error:', error.message);
+    }
+};
+
 interface ReplyMessage {
     replyToken: string;
     message: string;
@@ -240,9 +311,10 @@ export const getFlexTemplate = (
                 style: 'primary',
                 height: 'sm',
                 action: {
-                    type: 'uri',
+                    type: 'postback',
                     label: 'ดูแผนที่จากระบบ',
-                    uri: `${process.env.WEB_DOMAIN}/location?idlocation=${extendedHelpId || ''}&idsafezone=${resSafezone?.safezone_id || ''}&auToken=${resUser?.users_line_id || ''}`
+                    displayText: 'ขอดูตำแหน่งผู้ที่มีภาวะพึ่งพิง',
+                    data: `action=show_map&extenId=${extendedHelpId || ''}&idsafezone=${resSafezone?.safezone_id || ''}&caregiverLineId=${resUser?.users_line_id || ''}`
                 },
             },
             {
