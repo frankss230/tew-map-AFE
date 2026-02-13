@@ -312,7 +312,7 @@ export const getFlexTemplate = (
                 height: 'sm',
                 action: {
                     type: 'uri',
-                    label: 'ดูแผนที่จากระบบ',
+                    label: 'ดูแผนที่/นำทาง',
                     uri: `${process.env.WEB_DOMAIN}/location?idlocation=${extendedHelpId || ''}&idsafezone=${resSafezone?.safezone_id || ''}&auToken=${resUser?.users_line_id || ''}`
                 },
             },
