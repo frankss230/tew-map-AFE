@@ -41,7 +41,7 @@ export const replyMapCoordinates = async ({
         });
 
         // fetch caregiver user by line id and their latest location (if any)
-        const caregiverUser = await prisma.users.findUnique({ where: { users_line_id: toLineId } });
+        const caregiverUser = await prisma.users.findFirst({ where: { users_line_id: toLineId } });
         const caregiverLoc = caregiverUser ? await prisma.location.findFirst({ where: { users_id: caregiverUser.users_id }, orderBy: { locat_timestamp: 'desc' } }) : null;
 
         const messages: any[] = [];

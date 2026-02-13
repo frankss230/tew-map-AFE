@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { NextResponse } from 'next/server'
 import axios from "axios";
 import prisma from '@/lib/prisma'
-import { replyMessage, replyRegistration, replyUserData, replyNotRegistration, replyMenuBorrowequipment, replyConnection, replyLocation, replySetting, replyUserInfo, replyNotification } from '@/utils/apiLineReply';
+import { replyMessage, replyRegistration, replyUserData, replyNotRegistration, replyMenuBorrowequipment, replyConnection, replyLocation, replySetting, replyUserInfo, replyNotification, replyMapCoordinates } from '@/utils/apiLineReply';
 import { encrypt, parseQueryString } from '@/utils/helpers'
 import { postbackSafezone, postbackAccept, postbackClose } from '@/lib/lineFunction'
 import * as api from '@/lib/listAPI'
@@ -188,7 +188,12 @@ if (events.type === "postback" && events.postback?.data) {
 	console.log("Parsed Postback: ", postback);  // เช็คผลลัพธ์จากการ parse postback
   
 	// เช็ค postback.type สำหรับกรณีทั้ง 'safezone' และ 'alert'
-	if (postback.type === 'safezone' || postback.type === 'alert') {
+  // กรณีขอแผนที่จากปุ่มใหม่ (action=show_map)
+  if (postback.action === 'show_map') {
+    console.log('Show map postback received:', postback);
+    // ส่งพิกัดไปให้ผู้กด (ผู้ดูแล)
+    await replyMapCoordinates({ toLineId: events.source.userId, extenId: postback.extenId || postback.exten_id, takecareId: postback.takecare_id || postback.takecareId });
+  } else if (postback.type === 'safezone' || postback.type === 'alert') {
 	  console.log("Postback Triggered: ", postback);  // เช็คกรณี safezone หรือ alert
 	  const replyToken = await postbackSafezone({ userLineId: postback.userLineId, takecarepersonId: Number(postback.takecarepersonId) });
 	  console.log("Reply Token for Safezone: ", replyToken);  // เช็ค replyToken

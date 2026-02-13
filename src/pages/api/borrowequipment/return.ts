@@ -16,7 +16,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
                 select: { equipment_id: true }
             });
 
-            const equipmentIds = returnedEquipments.map(item => item.equipment_id);
+            const equipmentIds = returnedEquipments.map((item: typeof returnedEquipments[number]) => item.equipment_id);
 
             // อัปเดตสถานะของอุปกรณ์ให้เป็น 1 (ว่าง)
             await prisma.equipment.updateMany({

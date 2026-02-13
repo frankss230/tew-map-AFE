@@ -29,13 +29,13 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
 
       // กรองเฉพาะอุปกรณ์ในแต่ละรายการที่ยังถูกยืมอยู่ (equipment_status = 0)
       const filteredItems = borrowedItems
-        .map(item => ({
+        .map((item: typeof borrowedItems[number]) => ({
           ...item,
           borrowequipment_list: item.borrowequipment_list.filter(
-            eq => eq.equipment?.equipment_status === 0
+            (eq: typeof item.borrowequipment_list[number]) => eq.equipment?.equipment_status === 0
           ),
         }))
-        .filter(item => item.borrowequipment_list.length > 0);
+        .filter((item: typeof borrowedItems[number]) => item.borrowequipment_list.length > 0);
 
       return res.status(200).json({ message: 'success', data: filteredItems });
     } catch (error) {
