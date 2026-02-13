@@ -305,17 +305,17 @@ export const getFlexTemplate = (
                     data: postbackData,
                 },
             },
-            {
-                type: 'button',
-                color: "#1976D2",
-                style: 'primary',
-                height: 'sm',
-                action: {
-                    type: 'uri',
-                    label: 'ดูแผนที่/นำทาง',
-                    uri: `${process.env.WEB_DOMAIN}/location?idlocation=${extendedHelpId || ''}&idsafezone=${resSafezone?.safezone_id || ''}&auToken=${resUser?.users_line_id || ''}`
+                {
+                    type: 'button',
+                    color: "#1976D2",
+                    style: 'primary',
+                    height: 'sm',
+                    action: {
+                        type: 'uri',
+                        label: 'ดูแผนที่/นำทาง',
+                        uri: `${WEB_API}/location?auToken=${resUser?.users_line_id || ''}&idsafezone=${resSafezone?.safezone_id || ''}&idlocation=${extendedHelpId || ''}`
+                    },
                 },
-            },
             {
                 type: "text",
                 wrap: true,
